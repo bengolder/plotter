@@ -5,10 +5,12 @@ name = "pypi"
 
 [packages]
 pyserial = "*"
-ipython = "*"
+click = "*"
 
 [dev-packages]
 pytest = "*"
+ipython = "*"
+ipdb = "*"
 
 [requires]
 python_version = "3.7"
