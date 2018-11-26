@@ -18,17 +18,18 @@ class Plotter:
             for value in coord:
                 yield str(int(value * self.UNITS_PER_INCH))
 
-    def write_to_serial(self, command_string, dryrun=True):
+    def write_to_serial(self, command_string, dryrun=False):
         if dryrun:
             click.echo('SERIAL COMMAND: ' + command_string)
         else:
+            click.echo('SERIAL COMMAND: ' + command_string)
             self.ser.write(command_string.encode('utf-8'))
 
     def up(self, *coords):
-        self.write_to_serial('PU' + ','.join(self.feed_coords(*coords)))
+        self.write_to_serial('PU' + ','.join(self.feed_coords(*coords)) + ';')
 
     def down(self, *coords):
-        self.write_to_serial('PD' + ','.join(self.feed_coords(*coords)))
+        self.write_to_serial('PD' + ','.join(self.feed_coords(*coords)) + ';')
 
     def plot_geom(self, geom):
         self.up(geom[0])
@@ -50,13 +51,14 @@ def plot(picklefile):
     for serial_port in list_ports.comports():
         if 'Keyspan' in serial_port.description:
             print('I found the plotter!')
-            with serial.Serial(serial_port.device, timeout=0.05) as ser:
+            with serial.Serial(serial_port.device, timeout=0.05, xonxoff=True) as ser:
                 ser.write(b'IN;')
                 ser.write(b'OI;')
                 result = ser.readline()
                 print("It's a", result.decode('utf-8'))
                 plotter = Plotter(ser)
-                plotter.plot_geom_list(pickle.load(picklefile))
+                data = pickle.load(picklefile)
+                plotter.plot_geom_list(data)
 
 
 if __name__ == '__main__':
